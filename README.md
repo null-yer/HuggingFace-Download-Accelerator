@@ -3,83 +3,75 @@
 利用 HuggingFace 官方的下载工具 [huggingface-cli](https://huggingface.co/docs/huggingface_hub/guides/download#download-from-the-cli) 和 [hf_transfer](https://github.com/huggingface/hf_transfer) 从 [HuggingFace 镜像站](https://hf-mirror.com/)上对模型和数据集进行高速下载。
 
 ---
-**12/17/2023 update:** 新增 `--include` 和 `--exlucde`参数，可以指定下载或忽略某些文件。
-
-- 下载指定的文件: `--include "tokenizer.model tokenizer_config.json"`
-- 下载某一类文件: `--include "*.bin"`
-- 不下载指定文件: `--exclude "*.md"`
-- 也可以同时使用: `--include "*.json" --exclude "config.json"`
-
 
 ## Usage
 
+### 提示
+本代码是参照大佬@Xiaojian Yuan的思路做了优化和改进而来。
 
-### 下载模型
+参照代码：https://github.com/LetheSec/HuggingFace-Download-Accelerator
+原本是一个基于命令来下载hugginFace的模型文件，感觉难度有点高，所以优化为可视化界面。
 
-从HuggingFace上获取到所需模型名，例如 `lmsys/vicuna-7b-v1.5`：
+### 下载说明
 
-```bash
-python hf_download.py --model lmsys/vicuna-7b-v1.5 --save_dir ./hf_hub
-```
-如果下载需要授权的模型，例如 meta-llama 系列，则需要指定 `--token` 参数为你的 Huggingface Access Token。
+HuggingFace有一个镜像站，同样可以进行搜索下载，但是由于不能批量下载，因此增加了批量下载的功能；
 
-**注意事项：**
+HuggingFace镜像站：从镜像站 https://hf-mirror.com/ ；
 
-（1）脚本内置通过 pip 自动安装 huggingface-cli 和 hf_transfer。如果 hf_transfer 版本低于 0.1.4 则不会显示下载进度条，可以手动更新：
+### 一键启动包
+
+如果windows需要一键启动请点击这里下载：
+
+### 代码启动
+
+下载完代码之后，直接运行``` app.py ```文件即可；
+
+#### **注意事项**
+脚本内置通过 pip 自动安装 huggingface-cli 和 hf_transfer。如果 hf_transfer 版本低于 0.1.4 则不会显示下载进度条，可以手动更新：
 ```
 pip install -U hf-transfer -i https://pypi.org/simple
 ```
-如出现 `huggingface-cli: error` 问题，尝试重新安装：
+如出现 huggingface-cli: error 问题，尝试重新安装：
+
 ```
 pip install -U huggingface_hub
 ```
-如出现关于 `hf_transfer`的报错，可以通过`--use_hf_transfer False`参数关闭hf_transfer。
+如出现关于 hf_transfer的报错，可以通过--use_hf_transfer False参数关闭hf_transfer。
 
-（2）若指定了 `save_dir`，下载过程中会将文件先暂存在 transformers 的默认路径`~/.cache/huggingface/hub`中，下载完成后自动移动到`--save_dir`指定目录下，因此需要在下载前保证默认路径下有足够容量。 
 
-下载完成后使用 transformers 库加载时需要指定保存后的路径，例如：
-```python
-from transformers import pipeline
-pipe = pipeline("text-generation", model="./hf_hub/models--lmsys--vicuna-7b-v1.5")
-```
-若不指定 `save_dir` 则会下载到默认路径`~/.cache/huggingface/hub`中，这时调用模型可以直接使用模型名称 `lmsys/vicuna-7b-v1.5`。
 
-（3）若不想在调用时使用绝对路径，又不希望将所有模型保存在默认路径下，可以通过**软链接**的方式进行设置，步骤如下：
-- 先在任意位置创建目录，作为下载文件的真实存储位置，例如：
-    ```bash
-    mkdir /data/huggingface_cache
-    ```
-- 若 transforms 已经在默认位置 `~/.cache/huggingface/hub` 创建了目录，需要先删除：
-    ```bash
-    rm -r ~/.cache/huggingface
-    ```
-- 创建软链接指向真实存储目录：
-    ```bash
-    ln -s /data/huggingface_cache ~/.cache/huggingface
-    ``` 
-- 之后运行下载脚本时无需指定`save_dir`，会自动下载至第一步创建的目录下：
-    ```bash
-    python hf_download.py --model lmsys/vicuna-7b-v1.5
-    ```
-- 通过这种方式，调用模型时可以直接使用模型名称，而不需要使用存储路径：
-    ```bash
-    from transformers import pipeline
-    pipe = pipeline("text-generation", model="lmsys/vicuna-7b-v1.5")
-    ```
 
-### 下载数据集
+### 使用说明
 
-和下载模型同理，以 `zh-plus/tiny-imagenet` 为例:
-```bash
-python hf_download.py --dataset zh-plus/tiny-imagenet --save_dir ./hf_hub
-```
+使用前提：``` 必须有HuggingFace的账号，并设置了对应的访问令牌 ```
 
-### 参数说明
- -  `--model`: huggingface上要下载的模型名称，例如 `--model lmsys/vicuna-7b-v1.5`
- - `--dataset`: huggingface上要下载的数据集名称，例如 `--dataset zh-plus/tiny-imagenet`
- - `--save_dir`: 文件下载后实际的存储路径
- - `--token`: 下载需要登录的模型（Gated Model），例如`meta-llama/Llama-2-7b-hf`时，需要指定hugginface的token，格式为`hf_****`
- - `--use_hf_transfer`: 使用 hf-transfer 进行加速下载，默认开启(True), 若版本低于开启将不显示进度条。
- - `--use_mirror`: 从镜像站 https://hf-mirror.com/ 下载, 默认开启(True), 国内用户建议开启
-- `--include`: 下载指定的文件，例如 `--include "tokenizer.model tokenizer_config.json"` 或 `--include "*.bin` 下载
-- `--exclude`: 不下载指定的文件，与include用法一致，例如 `--exclude "*.md"`
+设置方法：
+1. 进入HuggingFace官网，登录后，点击```个人头像``` 然后再点击 ``` 设置 ```，如下图：
+
+![img.png](imgs/Hf_img.png)
+
+
+2. 点击 ```Access Tokens```后再点击```New token```新增token值，创建后会获得token值，记得复制保存一下；
+
+![img.png](imgs/info_img.png)
+
+
+## 使用方法
+启动后会出现一个可以访问的网址：  http://127.0.0.1:7860或者其他，最终以窗口显示的为准；
+
+![img.png](imgs/img.png)
+
+其中的项目名称，指的就是HuggingFace上的项目名，直接复制就行
+
+![img.png](imgs/pro_img.png)
+
+然后填入你的token值，点击加载模型就可以将所有的模型全部加载出来，然后选择你需要的进行下载即可，可以进行批量下载。
+
+![img.png](imgs/f_img.png)
+
+
+## 欢迎交流
+
+欢迎进交流群QQ748423897
+
+![img.png](imgs/qrcode.jpg)
