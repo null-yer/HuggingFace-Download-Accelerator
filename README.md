@@ -1,4 +1,4 @@
-# 国内用户 HuggingFace 高速下载
+# 国内用户 HuggingFace 可视化 高速下载
 
 利用 HuggingFace 官方的下载工具 [huggingface-cli](https://huggingface.co/docs/huggingface_hub/guides/download#download-from-the-cli) 和 [hf_transfer](https://github.com/huggingface/hf_transfer) 从 [HuggingFace 镜像站](https://hf-mirror.com/)上对模型和数据集进行高速下载。
 
@@ -20,7 +20,7 @@ HuggingFace镜像站：从镜像站 https://hf-mirror.com/ ；
 
 ### 一键启动包
 
-如果windows需要一键启动请点击这里下载：
+如果windows需要一键启动请点击这里下载：[点击下载](https://github.com/null-yer/HuggingFace-Download-Accelerator/releases/tag/first)
 
 ### 代码启动
 
